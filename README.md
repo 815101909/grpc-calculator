@@ -9,6 +9,7 @@
 - 📱 **响应式设计**: 基于 Tailwind CSS 的现代 UI 界面
 - 🛡️ **类型安全**: 通过 Protocol Buffers 确保前后端类型一致性
 - ⚡ **实时计算**: 支持加法、减法、乘法、除法运算
+- 🧪 **完整测试**: 前后端单元测试覆盖，确保代码质量
 
 ## 技术架构
 
@@ -69,12 +70,17 @@ grpc-calculator/
 │   ├── src/
 │   │   ├── app/             # Next.js 应用路由
 │   │   ├── components/      # React 组件
+│   │   │   └── Calculator.test.tsx  # 组件单元测试
 │   │   └── lib/             # gRPC 客户端代码
+│   │       └── calculator-client.test.ts  # API 客户端测试
 │   ├── proto/               # 前端 Proto 文件
+│   ├── jest.config.js       # Jest 测试配置
+│   ├── jest.setup.js        # Jest 设置文件
 │   └── package.json
 ├── internal/
 │   └── service/
-│       └── calculator.go    # 计算器服务实现
+│       ├── calculator.go    # 计算器服务实现
+│       └── calculator_test.go  # 服务单元测试
 ├── proto/
 │   └── calculator.proto     # Protocol Buffers 定义
 ├── go.mod
@@ -108,6 +114,31 @@ message CalculationResponse {
 
 ## 开发指南
 
+### 运行测试
+
+**后端测试**
+```bash
+# 运行所有后端测试
+go test ./internal/service -v
+
+# 运行测试并查看覆盖率
+go test ./internal/service -cover
+```
+
+**前端测试**
+```bash
+cd frontend
+
+# 运行所有测试
+npm test
+
+# 运行测试并监听文件变化
+npm run test:watch
+
+# 运行测试并生成覆盖率报告
+npm run test:coverage
+```
+
 ### 修改 Proto 文件
 
 1. 编辑 `proto/calculator.proto`
@@ -125,8 +156,11 @@ message CalculationResponse {
 
 1. 在 `proto/calculator.proto` 中添加新的 RPC 方法
 2. 在 `internal/service/calculator.go` 中实现服务逻辑
-3. 在前端 `src/lib/calculator-client.ts` 中添加客户端方法
-4. 在 `src/components/Calculator.tsx` 中添加 UI 支持
+3. 在 `internal/service/calculator_test.go` 中添加单元测试
+4. 在前端 `src/lib/calculator-client.ts` 中添加客户端方法
+5. 在 `src/lib/calculator-client.test.ts` 中添加客户端测试
+6. 在 `src/components/Calculator.tsx` 中添加 UI 支持
+7. 在 `src/components/Calculator.test.tsx` 中添加组件测试
 
 ## 许可证
 
