@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { calculatorAPI } from "@/lib/calculator-client";
 import type { CalculationResponse } from "@/lib/calculator_pb";
 
@@ -11,12 +11,14 @@ export default function Calculator() {
   const [result, setResult] = useState<CalculationResponse | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleCalculate = async () => {
+  const calculateResult = async () => {
     const a = parseFloat(firstNumber);
     const b = parseFloat(secondNumber);
 
-    if (isNaN(a) || isNaN(b)) {
-      setResult({ result: 0, error: "请输入有效的数字" });
+    // 如果任一输入为空或无效，清除结果
+    if (!firstNumber || !secondNumber || isNaN(a) || isNaN(b)) {
+      setResult(null);
+      setIsLoading(false);
       return;
     }
 
@@ -48,6 +50,15 @@ export default function Calculator() {
       setIsLoading(false);
     }
   };
+
+  // 实时计算：当输入或运算符改变时自动计算
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      calculateResult();
+    }, 300); // 300ms防抖，避免频繁计算
+
+    return () => clearTimeout(timeoutId);
+  }, [firstNumber, secondNumber, operator]);
 
   const handleClear = () => {
     setFirstNumber("");
@@ -86,10 +97,7 @@ export default function Calculator() {
             {["+", "-", "×", "÷"].map((op) => (
               <button
                 key={op}
-                onClick={() => {
-                  setOperator(op);
-                  setResult(null);
-                }}
+                onClick={() => setOperator(op)}
                 className={`px-4 py-2 rounded-md font-medium transition-colors ${
                   operator === op
                     ? "bg-blue-500 text-white"
@@ -116,38 +124,39 @@ export default function Calculator() {
           />
         </div>
 
-        {/* 计算按钮 */}
-        <div className="flex space-x-2">
-          <button
-            onClick={handleCalculate}
-            disabled={isLoading}
-            className="flex-1 bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 disabled:bg-blue-300 transition-colors font-medium"
-          >
-            {isLoading ? "计算中..." : "计算"}
-          </button>
+        {/* 清除按钮 */}
+        <div className="flex justify-center">
           <button
             onClick={handleClear}
-            className="bg-gray-500 text-white py-2 px-4 rounded-md hover:bg-gray-600 transition-colors font-medium"
+            className="bg-gray-500 text-white py-2 px-6 rounded-md hover:bg-gray-600 transition-colors font-medium"
           >
             清除
           </button>
         </div>
 
         {/* 结果显示 */}
-        {result && (
-          <div className="mt-4 p-4 bg-gray-50 rounded-md">
-            <h3 className="text-lg font-medium text-gray-800 mb-2">计算结果</h3>
-            {result.error ? (
-              <div className="text-red-600 font-medium">
-                错误: {result.error}
-              </div>
-            ) : (
-              <div className="text-2xl font-bold text-green-600">
-                {firstNumber} {operator} {secondNumber} = {result.result}
-              </div>
-            )}
-          </div>
-        )}
+        <div className="mt-4 p-4 bg-gray-50 rounded-md min-h-[80px] flex items-center justify-center">
+          {isLoading ? (
+            <div className="text-blue-600 font-medium">计算中...</div>
+          ) : result ? (
+            <div>
+              <h3 className="text-lg font-medium text-gray-800 mb-2 text-center">实时计算结果</h3>
+              {result.error ? (
+                <div className="text-red-600 font-medium text-center">
+                  错误: {result.error}
+                </div>
+              ) : (
+                <div className="text-2xl font-bold text-green-600 text-center">
+                  {firstNumber} {operator} {secondNumber} = {result.result}
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="text-gray-500 text-center">
+              {firstNumber && secondNumber ? "计算中..." : "请输入两个数字开始计算"}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

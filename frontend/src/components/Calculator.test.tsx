@@ -29,8 +29,8 @@ describe('Calculator Component', () => {
     expect(screen.getByText('计算器')).toBeInTheDocument()
     expect(screen.getByPlaceholderText('请输入第一个数字')).toBeInTheDocument()
     expect(screen.getByPlaceholderText('请输入第二个数字')).toBeInTheDocument()
-    expect(screen.getByText('计算')).toBeInTheDocument()
     expect(screen.getByText('清除')).toBeInTheDocument()
+    expect(screen.getByText('请输入两个数字开始计算')).toBeInTheDocument()
   })
 
   it('应该正确渲染所有运算符按钮', () => {
@@ -66,7 +66,7 @@ describe('Calculator Component', () => {
     expect(subtractButton).toHaveClass('bg-blue-500 text-white')
   })
 
-  it('应该能够执行加法运算', async () => {
+  it('应该能够实时执行加法运算', async () => {
     const user = userEvent.setup()
     mockCalculatorAPI.add.mockResolvedValue({ result: 8, error: '' })
     
@@ -74,19 +74,17 @@ describe('Calculator Component', () => {
     
     const firstInput = screen.getByPlaceholderText('请输入第一个数字')
     const secondInput = screen.getByPlaceholderText('请输入第二个数字')
-    const calculateButton = screen.getByText('计算')
     
     await user.type(firstInput, '5')
     await user.type(secondInput, '3')
-    await user.click(calculateButton)
     
     await waitFor(() => {
       expect(mockCalculatorAPI.add).toHaveBeenCalledWith(5, 3)
       expect(screen.getByText('5 + 3 = 8')).toBeInTheDocument()
-    })
+    }, { timeout: 1000 })
   })
 
-  it('应该能够执行减法运算', async () => {
+  it('应该能够实时执行减法运算', async () => {
     const user = userEvent.setup()
     mockCalculatorAPI.subtract.mockResolvedValue({ result: 2, error: '' })
     
@@ -95,20 +93,18 @@ describe('Calculator Component', () => {
     const firstInput = screen.getByPlaceholderText('请输入第一个数字')
     const secondInput = screen.getByPlaceholderText('请输入第二个数字')
     const subtractButton = screen.getByText('-')
-    const calculateButton = screen.getByText('计算')
     
     await user.type(firstInput, '5')
-    await user.type(secondInput, '3')
     await user.click(subtractButton)
-    await user.click(calculateButton)
+    await user.type(secondInput, '3')
     
     await waitFor(() => {
       expect(mockCalculatorAPI.subtract).toHaveBeenCalledWith(5, 3)
       expect(screen.getByText('5 - 3 = 2')).toBeInTheDocument()
-    })
+    }, { timeout: 1000 })
   })
 
-  it('应该能够执行乘法运算', async () => {
+  it('应该能够实时执行乘法运算', async () => {
     const user = userEvent.setup()
     mockCalculatorAPI.multiply.mockResolvedValue({ result: 15, error: '' })
     
@@ -117,20 +113,18 @@ describe('Calculator Component', () => {
     const firstInput = screen.getByPlaceholderText('请输入第一个数字')
     const secondInput = screen.getByPlaceholderText('请输入第二个数字')
     const multiplyButton = screen.getByText('×')
-    const calculateButton = screen.getByText('计算')
     
     await user.type(firstInput, '5')
-    await user.type(secondInput, '3')
     await user.click(multiplyButton)
-    await user.click(calculateButton)
+    await user.type(secondInput, '3')
     
     await waitFor(() => {
       expect(mockCalculatorAPI.multiply).toHaveBeenCalledWith(5, 3)
       expect(screen.getByText('5 × 3 = 15')).toBeInTheDocument()
-    })
+    }, { timeout: 1000 })
   })
 
-  it('应该能够执行除法运算', async () => {
+  it('应该能够实时执行除法运算', async () => {
     const user = userEvent.setup()
     mockCalculatorAPI.divide.mockResolvedValue({ result: 2, error: '' })
     
@@ -139,20 +133,18 @@ describe('Calculator Component', () => {
     const firstInput = screen.getByPlaceholderText('请输入第一个数字')
     const secondInput = screen.getByPlaceholderText('请输入第二个数字')
     const divideButton = screen.getByText('÷')
-    const calculateButton = screen.getByText('计算')
     
     await user.type(firstInput, '6')
-    await user.type(secondInput, '3')
     await user.click(divideButton)
-    await user.click(calculateButton)
+    await user.type(secondInput, '3')
     
     await waitFor(() => {
       expect(mockCalculatorAPI.divide).toHaveBeenCalledWith(6, 3)
       expect(screen.getByText('6 ÷ 3 = 2')).toBeInTheDocument()
-    })
+    }, { timeout: 1000 })
   })
 
-  it('应该处理除零错误', async () => {
+  it('应该实时处理除零错误', async () => {
     const user = userEvent.setup()
     mockCalculatorAPI.divide.mockResolvedValue({ result: 0, error: '除数不能为零' })
     
@@ -161,16 +153,14 @@ describe('Calculator Component', () => {
     const firstInput = screen.getByPlaceholderText('请输入第一个数字')
     const secondInput = screen.getByPlaceholderText('请输入第二个数字')
     const divideButton = screen.getByText('÷')
-    const calculateButton = screen.getByText('计算')
     
     await user.type(firstInput, '5')
-    await user.type(secondInput, '0')
     await user.click(divideButton)
-    await user.click(calculateButton)
+    await user.type(secondInput, '0')
     
     await waitFor(() => {
       expect(screen.getByText('错误: 除数不能为零')).toBeInTheDocument()
-    })
+    }, { timeout: 1000 })
   })
 
   it('应该处理无效输入', async () => {
@@ -178,17 +168,18 @@ describe('Calculator Component', () => {
     render(<Calculator />)
     
     const firstInput = screen.getByPlaceholderText('请输入第一个数字')
-    const calculateButton = screen.getByText('计算')
+    const secondInput = screen.getByPlaceholderText('请输入第二个数字')
     
     await user.type(firstInput, 'abc')
-    await user.click(calculateButton)
+    await user.type(secondInput, '3')
     
+    // 无效输入应该不会触发计算，显示提示信息
     await waitFor(() => {
-      expect(screen.getByText('错误: 请输入有效的数字')).toBeInTheDocument()
-    })
+      expect(screen.getByText('请输入两个数字开始计算')).toBeInTheDocument()
+    }, { timeout: 1000 })
   })
 
-  it('应该处理API错误', async () => {
+  it('应该实时处理API错误', async () => {
     const user = userEvent.setup()
     mockCalculatorAPI.add.mockRejectedValue(new Error('网络错误'))
     
@@ -196,18 +187,16 @@ describe('Calculator Component', () => {
     
     const firstInput = screen.getByPlaceholderText('请输入第一个数字')
     const secondInput = screen.getByPlaceholderText('请输入第二个数字')
-    const calculateButton = screen.getByText('计算')
     
     await user.type(firstInput, '5')
     await user.type(secondInput, '3')
-    await user.click(calculateButton)
     
     await waitFor(() => {
       expect(screen.getByText('错误: 计算失败')).toBeInTheDocument()
-    })
+    }, { timeout: 1000 })
   })
 
-  it('应该显示加载状态', async () => {
+  it('应该显示实时加载状态', async () => {
     const user = userEvent.setup()
     // 创建一个永远不会resolve的Promise来模拟加载状态
     mockCalculatorAPI.add.mockImplementation(() => new Promise(() => {}))
@@ -216,14 +205,13 @@ describe('Calculator Component', () => {
     
     const firstInput = screen.getByPlaceholderText('请输入第一个数字')
     const secondInput = screen.getByPlaceholderText('请输入第二个数字')
-    const calculateButton = screen.getByText('计算')
     
     await user.type(firstInput, '5')
     await user.type(secondInput, '3')
-    await user.click(calculateButton)
     
-    expect(screen.getByText('计算中...')).toBeInTheDocument()
-    expect(calculateButton).toBeDisabled()
+    await waitFor(() => {
+      expect(screen.getByText('计算中...')).toBeInTheDocument()
+    }, { timeout: 1000 })
   })
 
   it('应该能够清除输入和结果', async () => {
@@ -234,49 +222,48 @@ describe('Calculator Component', () => {
     
     const firstInput = screen.getByPlaceholderText('请输入第一个数字')
     const secondInput = screen.getByPlaceholderText('请输入第二个数字')
-    const calculateButton = screen.getByText('计算')
     const clearButton = screen.getByText('清除')
     
-    // 输入数字并计算
+    // 输入数字并等待实时计算
     await user.type(firstInput, '5')
     await user.type(secondInput, '3')
-    await user.click(calculateButton)
     
     await waitFor(() => {
       expect(screen.getByText('5 + 3 = 8')).toBeInTheDocument()
-    })
+    }, { timeout: 1000 })
     
     // 清除
     await user.click(clearButton)
     
     expect(firstInput).toHaveValue(null)
     expect(secondInput).toHaveValue(null)
-    expect(screen.queryByText('5 + 3 = 8')).not.toBeInTheDocument()
+    expect(screen.getByText('请输入两个数字开始计算')).toBeInTheDocument()
   })
 
-  it('应该在选择新运算符时清除结果', async () => {
+  it('应该在选择新运算符时重新计算', async () => {
     const user = userEvent.setup()
     mockCalculatorAPI.add.mockResolvedValue({ result: 8, error: '' })
+    mockCalculatorAPI.subtract.mockResolvedValue({ result: 2, error: '' })
     
     render(<Calculator />)
     
     const firstInput = screen.getByPlaceholderText('请输入第一个数字')
     const secondInput = screen.getByPlaceholderText('请输入第二个数字')
-    const calculateButton = screen.getByText('计算')
     const subtractButton = screen.getByText('-')
     
-    // 输入数字并计算
+    // 输入数字并等待加法计算
     await user.type(firstInput, '5')
     await user.type(secondInput, '3')
-    await user.click(calculateButton)
     
     await waitFor(() => {
       expect(screen.getByText('5 + 3 = 8')).toBeInTheDocument()
-    })
+    }, { timeout: 1000 })
     
-    // 选择新运算符
+    // 选择新运算符，应该重新计算
     await user.click(subtractButton)
     
-    expect(screen.queryByText('5 + 3 = 8')).not.toBeInTheDocument()
+    await waitFor(() => {
+      expect(screen.getByText('5 - 3 = 2')).toBeInTheDocument()
+    }, { timeout: 1000 })
   })
 })
