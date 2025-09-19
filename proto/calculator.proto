@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+package calculator.v1;
+
+option go_package = "calculator/gen/calculator/v1;calculatorv1";
+
+// CalculatorService 提供基础数学运算功能
+service CalculatorService {
+  // Add 执行加法运算
+  rpc Add(BinaryOperationRequest) returns (CalculationResponse);
+  
+  // Subtract 执行减法运算
+  rpc Subtract(BinaryOperationRequest) returns (CalculationResponse);
+  
+  // Multiply 执行乘法运算
+  rpc Multiply(BinaryOperationRequest) returns (CalculationResponse);
+  
+  // Divide 执行除法运算
+  rpc Divide(BinaryOperationRequest) returns (CalculationResponse);
+}
+
+// BinaryOperationRequest 二元运算请求
+message BinaryOperationRequest {
+  double a = 1;  // 第一个操作数
+  double b = 2;  // 第二个操作数
+}
+
+// CalculationResponse 计算结果响应
+message CalculationResponse {
+  double result = 1;  // 计算结果
+  string error = 2;   // 错误信息（如果有）
+}

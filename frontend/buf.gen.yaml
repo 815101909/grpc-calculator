@@ -1,0 +1,14 @@
+# buf.gen.yaml defines a local generation template.
+# For details, see https://buf.build/docs/configuration/v2/buf-gen-yaml
+version: v2
+inputs:
+  - directory: ../proto
+plugins:
+  # This will invoke protoc-gen-es and write output to src/lib
+  - local: protoc-gen-es
+    out: src/lib
+    opt: target=ts
+  # This will invoke protoc-gen-connect-es and write output to src/lib
+  - local: protoc-gen-connect-es
+    out: src/lib
+    opt: target=ts
